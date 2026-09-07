@@ -40,6 +40,10 @@ pnpm dsh web
 
 `pnpm run build` prepares the repository artifacts. `pnpm dsh web` uses those built artifacts without rebuilding.
 
+### Configure models
+
+Open **Settings → Models** in the Web UI to add a provider. A provider that also offers OAuth — Anthropic among them — shows a **Sign in** button beside the API key field, so you can log in with your Claude account instead of pasting a key. See the [model configuration guide](docs/user/guide/providers.md) for details.
+
 ## Community and support
 
 - Submit feedback or bug reports through [GitHub Discussions](https://github.com/deepseek-ai/deepseek-harness/discussions).

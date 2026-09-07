@@ -44,6 +44,10 @@ pnpm dsh web
 
 `pnpm run build` 会准备仓库产物。`pnpm dsh web` 会直接使用这些已构建产物，不会重新构建。
 
+### 配置模型
+
+在 Web UI 中打开**设置 → 模型**即可添加提供方。同时提供 OAuth 的提供方——其中包括 Anthropic——会在 API 密钥字段旁显示**登录**按钮，可直接用 Claude 账号登录而无需粘贴密钥。详见[模型配置指南](docs/user/guide/providers.zh.md)。
+
 ## 社区与支持
 
 - 通过 [GitHub Discussions](https://github.com/deepseek-ai/deepseek-harness/discussions) 提交反馈或 bug 报告。
