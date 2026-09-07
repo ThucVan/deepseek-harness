@@ -49,6 +49,12 @@ export type {} from '@deepseek-ai/dsh-settings/types'
 export type {} from '@deepseek-ai/dsh-user-approval/types'
 export type {} from '@deepseek-ai/dsh-user-questions/types'
 export type {} from '@deepseek-ai/dsh-api-session-controller/types'
+// Authorization vocabulary for the authorization namespace, and the Events
+// declarations `authorization/notice` and `authorization/prompt` ride.
+export type {
+  AuthorizationEntry, AuthorizationMethod, AuthorizationNotice, AuthorizationOutcome, AuthorizationPrompt,
+  AuthorizationPromptOption, AuthorizationStatus,
+} from '@deepseek-ai/dsh-authorization'
 
 /**
  * The carrier's Client-facing types, re-exported so a business package names one

@@ -55,6 +55,23 @@ declare module '@deepseek-ai/cordis' {
      * @param settlement - how it ended, including the `failed` case its caller sees as a thrown error.
      */
     'authorization/settled'(key: CredentialKey, settlement: AuthorizationSettlement): void
+    /**
+     * A running flow's report to whichever surface started its attempt.
+     * Fire-and-forget: nothing waits on a listener here.
+     * @mode emit
+     * @param payload - the attempt's key and the notice to render.
+     */
+    'authorization/notice'(payload: { key: CredentialKey; notice: AuthorizationNotice }): void
+    /**
+     * A running flow needs the human to answer before it can continue.
+     * Fire-and-forget, like `authorization/notice`: the answer travels back
+     * over a separate call (`AuthorizationController.answerPrompt`/
+     * `declinePrompt` on the browser-facing surface) rather than this event's
+     * return value, so no listener here blocks the flow.
+     * @mode emit
+     * @param payload - the attempt's key and the prompt to present.
+     */
+    'authorization/prompt'(payload: { key: CredentialKey; prompt: AuthorizationPrompt }): void
   }
 }
 

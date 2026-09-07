@@ -7,6 +7,7 @@
 
 import type { Context as ClientContext } from '@deepseek-ai/cordis'
 import type {
+  AuthorizationEntry, AuthorizationNotice, AuthorizationPrompt,
   CredentialInfo, LlmDiscoveredModel, LlmModelDiscoveryRequest,
   SettingsNamespaceView, SettingsPathOpView,
 } from '@deepseek-ai/dsh-api-remotes/client'
@@ -29,6 +30,27 @@ export type ModelDiscoveryOutcome =
   | { readonly kind: 'found'; readonly models: readonly LlmDiscoveredModel[] }
   /** The interrogation was refused, with the Host's own diagnostic. */
   | { readonly kind: 'refused'; readonly message: string }
+
+/** What one authorization attempt answered. */
+export type AuthorizationBeginOutcome =
+  /** The credential record was committed. */
+  | { readonly kind: 'authorized' }
+  /** The human declined, or the caller withdrew. */
+  | { readonly kind: 'cancelled' }
+  /** The attempt failed, with the Host's own diagnostic. */
+  | { readonly kind: 'refused'; readonly message: string }
+
+/** A notice from a running authorization attempt, addressed to its key. */
+export interface AuthorizationNoticeEvent {
+  readonly key: string
+  readonly notice: AuthorizationNotice
+}
+
+/** A prompt from a running authorization attempt, addressed to its key. */
+export interface AuthorizationPromptEvent {
+  readonly key: string
+  readonly prompt: AuthorizationPrompt
+}
 
 /** The Host operations the Models page and its cards invoke. */
 export interface ModelsOperations {
@@ -71,6 +93,49 @@ export interface ModelsOperations {
    * @returns the candidates, or the refusal.
    */
   discoverModels(settingsNs: string, request: LlmModelDiscoveryRequest): Promise<ModelDiscoveryOutcome>
+  /**
+   * Every registered authorization flow, for matching against a provider row's
+   * credential key.
+   * @returns one entry per flow the Host has registered.
+   */
+  listAuthorizations(): Promise<readonly AuthorizationEntry[]>
+  /**
+   * Run one attempt to authorize a credential key.
+   * @param key - the credential record to authorize, as `<scope>/<id>`.
+   * @param method - which of the flow's methods to run.
+   * @param signal - caller lifetime; abort withdraws the attempt.
+   * @returns how the attempt ended.
+   */
+  beginAuthorization(key: string, method: string, signal: AbortSignal): Promise<AuthorizationBeginOutcome>
+  /**
+   * Withdraw the attempt running for a key, if any (best-effort).
+   * @param key - the credential record whose attempt should stop.
+   */
+  cancelAuthorization(key: string): Promise<void>
+  /**
+   * Listen for every running attempt's notices; a card filters by its own key.
+   * @param handler - called with each forwarded notice.
+   * @returns disposer that stops listening.
+   */
+  onAuthorizationNotice(handler: (payload: AuthorizationNoticeEvent) => void): () => void
+  /**
+   * Listen for every running attempt's prompts; a card filters by its own key.
+   * @param handler - called with each forwarded prompt.
+   * @returns disposer that stops listening.
+   */
+  onAuthorizationPrompt(handler: (payload: AuthorizationPromptEvent) => void): () => void
+  /**
+   * Answer the prompt currently pending for a key.
+   * @param key - the credential record whose prompt to answer.
+   * @param value - the typed text, or the chosen option's id.
+   * @returns the refusal message, or undefined once answered.
+   */
+  answerAuthorizationPrompt(key: string, value: string): Promise<string | undefined>
+  /**
+   * Decline the prompt currently pending for a key.
+   * @param key - the credential record whose prompt to decline.
+   */
+  declineAuthorizationPrompt(key: string): Promise<void>
 }
 
 /**
@@ -104,6 +169,27 @@ export function createModelsOperations(ctx: ClientContext): ModelsOperations {
       return response.ok
         ? { kind: 'found', models: response.value }
         : { kind: 'refused', message: response.error.message }
+    },
+    listAuthorizations: async () => {
+      const response = await ctx.remote.authorization.list()
+      return response.ok ? response.value : []
+    },
+    beginAuthorization: async (key, method, signal) => {
+      const response = await ctx.remote.authorization.begin(key, method, signal)
+      if (!response.ok) return { kind: 'refused', message: response.error.message }
+      return { kind: response.value.status }
+    },
+    cancelAuthorization: async (key) => {
+      await ctx.remote.authorization.cancel(key)
+    },
+    onAuthorizationNotice: handler => ctx.remote.$on('authorization/notice', handler),
+    onAuthorizationPrompt: handler => ctx.remote.$on('authorization/prompt', handler),
+    answerAuthorizationPrompt: async (key, value) => {
+      const response = await ctx.remote.authorization.answerPrompt(key, value)
+      return response.ok ? undefined : response.error.message
+    },
+    declineAuthorizationPrompt: async (key) => {
+      await ctx.remote.authorization.declinePrompt(key)
     },
   }
 }

@@ -25,6 +25,14 @@ declare module '@deepseek-ai/dsh-typert-protocol' {
      * reference, never the value.
      */
     'credential/rejected': { readonly ref: string }
+    /** No authorization flow is registered for the requested credential key. */
+    'authorization/no-flow': { readonly key: string }
+    /** The requested method is not one the flow offers. */
+    'authorization/unknown-method': { readonly key: string; readonly method: string }
+    /** An authorization attempt for this key is already running. */
+    'authorization/in-flight': { readonly key: string }
+    /** The flow resolved without committing its credential record. */
+    'authorization/not-committed': { readonly key: string }
   }
 }
 

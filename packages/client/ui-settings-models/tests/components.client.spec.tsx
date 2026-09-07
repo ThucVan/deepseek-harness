@@ -203,6 +203,9 @@ function scriptedFace(overrides: {
       set,
       unset,
     },
+    authorization: {
+      list: vi.fn(() => Promise.resolve(remoteOk([]))),
+    },
   }
   return { face, update, mutate, set, unset }
 }

@@ -24,9 +24,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import type {
-  CredentialInfo, SettingsNamespaceView, SettingsPathOpView,
+  AuthorizationEntry, CredentialInfo, SettingsNamespaceView, SettingsPathOpView,
 } from '@deepseek-ai/dsh-api-remotes/client'
 import type { JsonValue } from '@deepseek-ai/dsh-util-values'
+import { AuthorizationDialog } from './AuthorizationDialog.tsx'
 import {
   DeepSeekModelsEditor, modelDrafts, validateDeepSeekModels,
 } from './DeepSeekModelsEditor.tsx'
@@ -160,6 +161,8 @@ export function ProviderEditor(props: ProviderEditorProps): ReactNode {
   const [draft, setDraft] = useState<Record<string, unknown>>(() => draftAt(schema, namespace, settingsPath))
   const [keyDraft, setKeyDraft] = useState('')
   const [keyState, setKeyState] = useState<CredentialInfo | undefined>(undefined)
+  const [authEntry, setAuthEntry] = useState<AuthorizationEntry | undefined>(undefined)
+  const [authDialogOpen, setAuthDialogOpen] = useState(false)
   const [busy, setBusy] = useState(false)
   const [failure, setFailure] = useState<string | undefined>(undefined)
   // A settings success advances both retry baselines immediately. Keeping the
@@ -195,6 +198,23 @@ export function ProviderEditor(props: ProviderEditorProps): ReactNode {
     })
     return () => { stale = true }
   }, [operations, keyRef])
+
+  // Only a pi-ai route authenticates through the authorization seam; its
+  // credential record is keyed by the route id, independent of the `apiKeyEnv`
+  // reference the password field above writes.
+  const authorizationKey = layout === 'pi-ai' ? `llm-pi-ai/${props.provider}` : undefined
+
+  useEffect(() => {
+    if (authorizationKey === undefined) { setAuthEntry(undefined); return }
+    let stale = false
+    void operations.listAuthorizations().then((entries) => {
+      if (stale) return
+      setAuthEntry(entries.find(entry => entry.key === authorizationKey))
+    })
+    return () => { stale = true }
+  }, [operations, authorizationKey])
+
+  const oauthMethod = authEntry?.methods.find(method => method.id === 'oauth')
 
   const stringAt = (source: unknown, key: string): string | undefined => {
     const value = schema.getPath(source, [key])
@@ -292,6 +312,25 @@ export function ProviderEditor(props: ProviderEditorProps): ReactNode {
     return undefined
   }
 
+  /**
+   * A route is dormant until its settings section declares it, even with an
+   * empty profile — the same materialization the plain key path performs when
+   * a key is applied with none typed. OAuth commits straight to the
+   * credential record, bypassing that write entirely, so a route with no
+   * profile yet still needs one materialized here or it never registers.
+   */
+  const activateAfterAuthorization = async (): Promise<void> => {
+    if (layout !== 'pi-ai' || fallback !== undefined || committedOriginal !== undefined) return
+    const written = await operations.writeSettings(
+      namespace.ns,
+      [{ op: 'set', path: [...settingsPath], value: {} }],
+      expectedRevision,
+    )
+    if (written.kind !== 'written') return
+    setCommittedOriginal(schema.getPath(written.view.user, settingsPath))
+    setExpectedRevision(written.view.revision)
+  }
+
   const apply = async (): Promise<void> => {
     setBusy(true)
     setFailure(undefined)
@@ -376,6 +415,16 @@ export function ProviderEditor(props: ProviderEditorProps): ReactNode {
             onChange={(event) => { setKeyDraft(event.target.value) }}
           />
           {shownKeyFailure === undefined ? null : <p className={styles['error']}>{t(shownKeyFailure)}</p>}
+          {oauthMethod === undefined ? null : (
+            <button
+              type="button"
+              className={styles['linkButton']}
+              disabled={disabled}
+              onClick={() => { setAuthDialogOpen(true) }}
+            >
+              {oauthMethod.label}
+            </button>
+          )}
         </div>
         {props.credentialOnly === true ? null : <details className={styles['customized']}>
           <summary className={styles['customizedSummary']}>{t('customized')}</summary>
@@ -511,6 +560,21 @@ export function ProviderEditor(props: ProviderEditorProps): ReactNode {
         onCancel={() => { props.onClose(false) }}
         onSubmit={() => { void apply() }}
       />
+      {authorizationKey === undefined || oauthMethod === undefined ? null : (
+        <AuthorizationDialog
+          open={authDialogOpen}
+          credentialKey={authorizationKey}
+          method={oauthMethod.id}
+          methodLabel={oauthMethod.label}
+          operations={operations}
+          t={t}
+          onClose={(authorized) => {
+            setAuthDialogOpen(false)
+            if (!authorized) return
+            void activateAfterAuthorization().then(() => { props.onClose(true) })
+          }}
+        />
+      )}
     </div>
   )
 }

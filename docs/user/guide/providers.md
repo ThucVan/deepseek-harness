@@ -16,7 +16,7 @@ Keys are write-only. The page receives a redacted descriptor after saving, never
 
 Choose **Add provider** and pick a provider dsh ships with; the list shows provider ids such as `anthropic`, `openai`, `moonshotai` for Kimi, or `zai` for GLM. Enter its API key and save. The installed catalog supplies the endpoint, protocol, and model list.
 
-Providers that sign in with OAuth, such as Codex, are not supported here yet.
+A provider that also offers OAuth — Anthropic among them — shows a **Sign in** button beside the key field. It opens a dialog that relays the flow's own instructions: typically a link to open and complete in your browser, and (Anthropic's own flow included) a field to paste back the authorization code or the final redirect URL, for a browser on a different machine than the one running dsh. The credential is stored once the flow reports success, and the card picks it up without a page reload.
 
 ## Add a custom provider
 
