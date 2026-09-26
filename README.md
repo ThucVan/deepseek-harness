@@ -40,9 +40,14 @@ pnpm dsh web
 
 `pnpm run build` prepares the repository artifacts. `pnpm dsh web` uses those built artifacts without rebuilding.
 
-### Configure models
+### Configure models and 9router
 
 Open **Settings → Models** in the Web UI to add a provider. A provider that also offers OAuth — Anthropic among them — shows a **Sign in** button beside the API key field, so you can log in with your Claude account instead of pasting a key. See the [model configuration guide](docs/user/guide/providers.md) for details.
+
+To use the local 9router gateway and the planning-first **Work** orchestration agent:
+1. Install 9router: `npm install --global 9router@0.5.86`.
+2. Clone [Import-9Router-JsCodex](https://github.com/CBNN999999/Import-9Router-JsCodex) beside this repository.
+3. Open **Settings → 9router** and click **Refresh brain model** to rank available models, exclude DeepSeek from the brain role, set the strongest brain, and enable Gemini-preferred worker delegation.
 
 ## Community and support
 

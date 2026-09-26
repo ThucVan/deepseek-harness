@@ -44,9 +44,14 @@ pnpm dsh web
 
 `pnpm run build` 会准备仓库产物。`pnpm dsh web` 会直接使用这些已构建产物，不会重新构建。
 
-### 配置模型
+### 配置模型与 9router
 
 在 Web UI 中打开**设置 → 模型**即可添加提供方。同时提供 OAuth 的提供方——其中包括 Anthropic——会在 API 密钥字段旁显示**登录**按钮，可直接用 Claude 账号登录而无需粘贴密钥。详见[模型配置指南](docs/user/guide/providers.zh.md)。
+
+如需配合本地 9router 网关与 planning-first 的 **Work** 编排 Agent：
+1. 安装 9router：`npm install --global 9router@0.5.86`。
+2. 将 [Import-9Router-JsCodex](https://github.com/CBNN999999/Import-9Router-JsCodex) 克隆到本仓库旁边。
+3. 打开**设置 → 9router**并点击**刷新大脑模型**：自动扫描所有活跃 provider、排除 DeepSeek 担任大脑、选择最强大脑，并启用优先使用 Gemini 的 worker 委派。
 
 ## 社区与支持
 
