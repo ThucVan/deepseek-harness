@@ -1,0 +1,3 @@
+name: Work
+description: Planning-first orchestration agent that delegates execution, prefers Gemini workers, and retries alternate available routes.
+order: 0

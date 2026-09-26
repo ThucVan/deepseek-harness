@@ -685,6 +685,7 @@ export class LlmRuntime extends TypertRemoteService {
    * @param provider - registered provider route to inspect.
    * @returns detached model metadata in adapter-preferred order.
    */
+  @Remote
   async listModels(provider: string): Promise<LlmModelInfo[]> {
     const adapter = this.registration(provider).adapter
     const models = await adapter.listModels(provider)

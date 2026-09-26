@@ -227,7 +227,7 @@ export interface Config {
 }
 ```
 
-Source: [`packages/api/settings-controller/src/index.ts:36`](../packages/api/settings-controller/src/index.ts)
+Source: [`packages/api/settings-controller/src/index.ts:38`](../packages/api/settings-controller/src/index.ts)
 
 <a id="deepseek-aidsh-attachment-local"></a>
 
@@ -353,6 +353,26 @@ export interface Config {
 ```
 
 Source: [`packages/client/hmr/src/index.ts:31`](../packages/client/hmr/src/index.ts)
+
+<a id="deepseek-aidsh-client-ui-settings-9router"></a>
+
+## `@deepseek-ai/dsh-client-ui-settings-9router`
+
+```ts config-catalog
+/** Host configuration for automatic local-process startup. */
+export interface Config {
+  /** Absolute 9router cli.js or executable path; environment fallback: DSH_9ROUTER_ENTRY or NINER_CLI. */
+  routerEntry?: string
+  /** Absolute path to Import-9Router-JsCodex/gui.js; environment fallback: DSH_9ROUTER_IMPORTER_ENTRY. */
+  importerEntry?: string
+  /** Start the 9router gateway when port 20128 is closed. */
+  autoStartRouter?: boolean
+  /** Start the importer workspace when port 20129 is closed. */
+  autoStartImporter?: boolean
+}
+```
+
+Source: [`packages/client/ui-settings-9router/src/index.ts:21`](../packages/client/ui-settings-9router/src/index.ts)
 
 <a id="deepseek-aidsh-code-runtime-worker-thread"></a>
 
