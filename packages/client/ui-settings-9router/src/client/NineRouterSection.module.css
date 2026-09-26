@@ -2,26 +2,29 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  width: min(980px, calc(100vw - 80px));
+  width: 100%;
+  min-width: 0;
   color: var(--dsw-alias-label-primary);
 }
-.header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.header { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
+.header > :first-child { min-width: 0; }
 .title { margin: 0; font-size: 16px; line-height: 24px; font-weight: 500; }
 .intro, .notice, .help { margin: 0; color: var(--dsw-alias-label-tertiary); font-size: 12px; line-height: 18px; }
 .intro { max-width: 620px; margin-top: 4px; font-size: 14px; line-height: 22px; }
 .notice { padding: 8px 10px; border: 0.5px solid var(--dsw-alias-border-l4); border-radius: 8px; }
-.brainCard { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px; border: 0.5px solid var(--dsw-alias-border-l4); border-radius: 12px; background: var(--dsw-alias-bg-card); }
+.brainCard { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 14px; border: 0.5px solid var(--dsw-alias-border-l4); border-radius: 12px; background: var(--dsw-alias-bg-card); }
+.brainCard > div { flex: 1 1 240px; min-width: 0; }
 .brainTitle { margin: 0 0 4px; font-size: 14px; line-height: 20px; font-weight: 500; }
 .brainStatus { margin: 6px 0 0; color: var(--dsw-alias-label-primary); font-size: 12px; line-height: 18px; }
 .actions { display: flex; flex: none; flex-wrap: wrap; gap: 8px; }
 .primaryButton, .secondaryButton, .embedButton {
   box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center;
-  height: 36px; padding: 0 14px; border-radius: 18px; font: inherit; font-size: 13px; line-height: 20px; text-decoration: none; cursor: pointer;
+  height: 36px; padding: 0 14px; border-radius: 18px; font: inherit; font-size: 13px; line-height: 20px; text-decoration: none; white-space: nowrap; cursor: pointer;
 }
 .primaryButton { border: 0; color: var(--dsw-alias-label-primary-inverted); background: var(--dsw-alias-label-primary); }
 .primaryButton:hover { opacity: 0.88; }
 .secondaryButton, .embedButton { border: 0.5px solid var(--dsw-alias-border-l3); color: var(--dsw-alias-label-primary); background: transparent; }
 .secondaryButton:hover, .embedButton:hover { background: var(--dsw-alias-interactive-bg-hover-solid); }
 .embedButton { align-self: flex-start; }
-.frame { box-sizing: border-box; width: 100%; min-height: min(680px, calc(100vh - 220px)); border: 0.5px solid var(--dsw-alias-border-l4); border-radius: 16px; background: var(--dsw-alias-bg-base); }
+.frame { box-sizing: border-box; width: 100%; max-width: 100%; min-height: min(680px, calc(100vh - 220px)); border: 0.5px solid var(--dsw-alias-border-l4); border-radius: 16px; background: var(--dsw-alias-bg-base); }
 @media (max-width: 720px) { .section { width: 100%; } .header { flex-direction: column; } .frame { min-height: 720px; } }

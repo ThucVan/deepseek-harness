@@ -120,7 +120,8 @@ class RemoteStreamMuxConnection {
         }
         try {
           this.receive(rawText(data))
-        } catch {
+        } catch (error) {
+          console.error('[RemoteStreamMuxConnection error]', error, 'data was:', String(data))
           this.socket.close(1008, 'invalid Remote stream request')
         }
       })
