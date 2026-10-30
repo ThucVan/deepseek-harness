@@ -127,9 +127,75 @@ async function prepareRequestImages(
   return versions
 }
 
+/**
+ * Maximum JSON nesting depth permitted within tool parameter schemas.
+ * Downstream gateways and model providers (such as OpenAI and River AI) enforce strict
+ * nesting limits (e.g. 32 levels) on request bodies; limiting parameter schema depth to 16
+ * prevents deeply nested MCP schemas from breaching wire validation limits.
+ */
+export const MAX_TOOL_SCHEMA_DEPTH = 16
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
+function pruneSchemaNode(
+  schema: Record<string, unknown>,
+  depth: number,
+  maxDepth: number,
+): Record<string, unknown> {
+  if (depth >= maxDepth) {
+    const leaf: Record<string, unknown> = {}
+    if (typeof schema['type'] === 'string') leaf['type'] = schema['type']
+    if (typeof schema['description'] === 'string') leaf['description'] = schema['description']
+    return leaf
+  }
+
+  const result: Record<string, unknown> = {}
+  for (const [key, value] of Object.entries(schema)) {
+    if ((key === 'properties' || key === 'patternProperties' || key === 'required') && depth >= maxDepth - 1) {
+      continue
+    }
+    if ((key === 'items' || key === 'oneOf' || key === 'anyOf' || key === 'allOf') && depth >= maxDepth - 1) {
+      continue
+    }
+    result[key] = pruneSchemaValue(value, depth + 1, maxDepth)
+  }
+  return result
+}
+
+function pruneSchemaValue(value: unknown, depth: number, maxDepth: number): unknown {
+  if (isPlainObject(value)) {
+    return pruneSchemaNode(value, depth, maxDepth)
+  }
+  if (Array.isArray(value)) {
+    if (depth >= maxDepth) return []
+    return value.map(item => pruneSchemaValue(item, depth + 1, maxDepth))
+  }
+  return value
+}
+
+/**
+ * Prune schema nesting beyond {@link MAX_TOOL_SCHEMA_DEPTH} so wire requests stay
+ * safely within downstream gateway and provider JSON depth limits.
+ *
+ * @param schema - Tool parameters schema to inspect and prune.
+ * @param depth - Current nesting depth (1-based).
+ * @param maxDepth - Maximum permitted depth before truncation.
+ * @returns The bounded schema tree.
+ */
+export function pruneToolSchemaDepth(
+  schema: unknown,
+  depth = 1,
+  maxDepth = MAX_TOOL_SCHEMA_DEPTH,
+): Record<string, unknown> {
+  if (!isPlainObject(schema)) return {}
+  return pruneSchemaNode(schema, depth, maxDepth)
+}
+
 /** Convert a projected declaration without its harness-owned activation marker. */
 function piTool(tool: NonNullable<GenerateOptions['tools']>[number]): PiTool {
-  return { name: tool.name, description: tool.description, parameters: tool.parameters }
+  return { name: tool.name, description: tool.description, parameters: pruneToolSchemaDepth(tool.parameters) }
 }
 
 function toolsOf(options: GenerateOptions): PiTool[] | undefined {

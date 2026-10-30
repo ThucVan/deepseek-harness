@@ -67,4 +67,31 @@ describe('MCP result callback adaptation', () => {
       }
     },
   )
+
+  it('prunes deeply nested inputSchema before registration', async () => {
+    const ctx = new Context()
+    try {
+      await ctx.plugin(SystemPrompt)
+      await ctx.plugin(ToolRuntime)
+      let deep: Record<string, unknown> = { type: 'string' }
+      for (let i = 0; i < 30; i++) {
+        deep = { type: 'object', properties: { child: deep } }
+      }
+      const def = createMcpToolDefinition(ctx, {
+        name: 'deep_tool', rawName: 'deep', description: 'Deep fixture.',
+        inputSchema: deep, call: async () => ({ content: [] }),
+      })
+      function getDepth(obj: unknown, current = 1): number {
+        if (typeof obj !== 'object' || obj === null) return current
+        let max = current
+        for (const val of Object.values(obj)) {
+          max = Math.max(max, getDepth(val, current + 1))
+        }
+        return max
+      }
+      expect(getDepth(def.parameters)).toBeLessThanOrEqual(18)
+    } finally {
+      await ctx.fiber.dispose()
+    }
+  })
 })

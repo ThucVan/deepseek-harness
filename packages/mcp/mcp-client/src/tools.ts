@@ -215,6 +215,53 @@ export interface McpToolDefinitionOptions {
   call(args: Record<string, unknown>, execution: ToolExecution): Promise<unknown>
 }
 
+/** Maximum JSON nesting depth permitted within MCP tool parameter schemas. */
+const MAX_MCP_INPUT_SCHEMA_DEPTH = 16
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
+function pruneMcpSchemaNode(
+  schema: Record<string, unknown>,
+  depth: number,
+  maxDepth: number,
+): Record<string, unknown> {
+  if (depth >= maxDepth) {
+    const leaf: Record<string, unknown> = {}
+    if (typeof schema['type'] === 'string') leaf['type'] = schema['type']
+    if (typeof schema['description'] === 'string') leaf['description'] = schema['description']
+    return leaf
+  }
+
+  const result: Record<string, unknown> = {}
+  for (const [key, value] of Object.entries(schema)) {
+    if ((key === 'properties' || key === 'patternProperties' || key === 'required') && depth >= maxDepth - 1) {
+      continue
+    }
+    if ((key === 'items' || key === 'oneOf' || key === 'anyOf' || key === 'allOf') && depth >= maxDepth - 1) {
+      continue
+    }
+    result[key] = pruneMcpSchemaValue(value, depth + 1, maxDepth)
+  }
+  return result
+}
+
+function pruneMcpSchemaValue(value: unknown, depth: number, maxDepth: number): unknown {
+  if (isPlainObject(value)) {
+    return pruneMcpSchemaNode(value, depth, maxDepth)
+  }
+  if (Array.isArray(value)) {
+    if (depth >= maxDepth) return []
+    return value.map(item => pruneMcpSchemaValue(item, depth + 1, maxDepth))
+  }
+  return value
+}
+
+function pruneMcpInputSchema(schema: Record<string, unknown>): Record<string, unknown> {
+  return pruneMcpSchemaNode(schema, 1, MAX_MCP_INPUT_SCHEMA_DEPTH)
+}
+
 /**
  * Adapt an upstream MCP tool to canonical values and durable image content.
  * Registration, provider lifetime, deadlines, and transport belong to the caller.
@@ -231,7 +278,7 @@ export function createMcpToolDefinition(
   return {
     name,
     description,
-    parameters: inputSchema,
+    parameters: pruneMcpInputSchema(inputSchema),
     output: createOutput(rawName, supportedOutputSchema(options.outputSchema)),
     execute: createExecutor(ctx, options, projections),
     projectContent(exec: Readonly<ToolExecution>, result: Readonly<ToolExecutionResult>) {

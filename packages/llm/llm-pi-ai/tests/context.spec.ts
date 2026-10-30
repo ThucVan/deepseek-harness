@@ -9,7 +9,7 @@ import type {
 import { createDeveloperMessage, ToolCallId, createAssistantMessage, createMessage, createToolResultMessage, createUserMessage, offloadedImageText } from '@deepseek-ai/dsh-llm'
 import type { ContentBlock, GenerateOptions, Message, RequestUserInput } from '@deepseek-ai/dsh-llm'
 import type { ContextFormed } from '@deepseek-ai/dsh-llm'
-import { toPiContext } from '../src/context.ts'
+import { pruneToolSchemaDepth, toPiContext } from '../src/context.ts'
 import type { PiImageRequestContext } from '../src/context.ts'
 import { toPiAssistant } from '../src/replay.ts'
 
@@ -686,5 +686,40 @@ describe('pi-ai system prompt source', () => {
     const read = vi.fn()
     await expect(toPiContext(options, imageContext(projectionStore(read)))).rejects.toThrow(error)
     expect(read).not.toHaveBeenCalled()
+  })
+
+  it('prunes tool parameter schemas exceeding the maximum nesting depth', () => {
+    let deepSchema: Record<string, unknown> = { type: 'string', description: 'innermost' }
+    for (let index = 0; index < 30; index++) {
+      deepSchema = {
+        type: 'object',
+        description: `level-${index}`,
+        properties: { child: deepSchema },
+        required: ['child'],
+      }
+    }
+
+    const tool = { name: 'deepTool', description: 'deep', parameters: deepSchema }
+    const context = toPiContext({ ...base, tools: [tool], messages: [question] })
+    expect(context.tools).toHaveLength(1)
+    const parameters = context.tools?.[0]?.parameters
+
+    function getDepth(obj: unknown, currentDepth = 1): number {
+      if (typeof obj !== 'object' || obj === null) return currentDepth
+      let max = currentDepth
+      for (const val of Object.values(obj)) {
+        max = Math.max(max, getDepth(val, currentDepth + 1))
+      }
+      return max
+    }
+
+    expect(getDepth(parameters)).toBeLessThanOrEqual(18)
+    expect(pruneToolSchemaDepth(null)).toEqual({})
+    expect(pruneToolSchemaDepth('primitive')).toEqual({})
+    expect(pruneToolSchemaDepth([1, 2, 3])).toEqual({})
+    expect(pruneToolSchemaDepth({ type: 'object', properties: { q: { type: 'string' } } })).toEqual({
+      type: 'object',
+      properties: { q: { type: 'string' } },
+    })
   })
 })
