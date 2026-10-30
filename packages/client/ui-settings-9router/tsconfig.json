@@ -10,8 +10,8 @@
     { "path": "../../../vendor/cordis" },
     { "path": "../../../vendor/schemastery" },
     { "path": "../../api/remotes/tsconfig.client.json" },
-    { "path": "../locale" },
-    { "path": "../ui-settings" },
+    { "path": "../locale/tsconfig.client.json" },
+    { "path": "../ui-settings/tsconfig.client.json" },
     { "path": "../ui-slots" },
     { "path": "../ui-renderer" }
   ]

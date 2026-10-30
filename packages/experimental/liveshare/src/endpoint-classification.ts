@@ -107,6 +107,11 @@ export const VIEWER_ENDPOINT_CLASSES = {
   'credentials/describe': 'owner-only', // owner credentials; secrets never reach a reader
   'credentials/set': 'owner-only', // owner credentials; secrets never reach a reader
   'credentials/unset': 'owner-only', // owner credentials; secrets never reach a reader
+  'authorization/answerPrompt': 'owner-only', // owner credentials; secrets never reach a reader
+  'authorization/begin': 'owner-only', // owner credentials; secrets never reach a reader
+  'authorization/cancel': 'owner-only', // owner credentials; secrets never reach a reader
+  'authorization/declinePrompt': 'owner-only', // owner credentials; secrets never reach a reader
+  'authorization/list': 'owner-only', // owner credentials; secrets never reach a reader
   'settings/describe': 'owner-only', // owner settings
   'settings/mutate': 'owner-only', // owner settings
   'settings/openSettingsDocument': 'owner-only', // owner settings
@@ -211,6 +216,7 @@ export const VIEWER_ENDPOINT_CLASSES = {
   'userQuestions/answer': 'owner-only', // owner answers a pending question
   'userQuestions/attachWait': 'owner-only', // owner answers a pending question
   'llm/discoverModels': 'owner-only', // owner discovers models
+  'llm/listModels': 'owner-only', // owner lists models
   'agentPresets/list': 'owner-only', // owner agent presets
   'agentPresets/read': 'owner-only', // owner agent presets
   'agentPresets/select': 'owner-only', // owner agent presets

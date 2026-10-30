@@ -430,6 +430,9 @@ export const ja = {
   'onboardingSave': '保存して続ける',
   'onboardingSaving': '保存中…',
   'keyRequired': '続けるにはAPIキーを入力してください。',
+  signIn: 'サインイン',
+  signingIn: 'サインイン中…',
+  authContinue: '次へ',
 } satisfies Record<keyof typeof en, string>
 
 /** Spanish dictionary, checked against the English keys. */
@@ -571,6 +574,9 @@ export const es = {
   onboardingSave: 'Guardar y continuar',
   onboardingSaving: 'Guardando…',
   keyRequired: 'Ingrese una clave API para continuar.',
+  signIn: 'Iniciar sesión',
+  signingIn: 'Iniciando sesión…',
+  authContinue: 'Continuar',
 } satisfies Record<keyof typeof en, string>
 
 /** French dictionary, checked against the English keys. */
@@ -712,6 +718,9 @@ export const fr = {
   onboardingSave: 'Enregistrer et continuer',
   onboardingSaving: 'Sauvegarde…',
   keyRequired: 'Entrez une clé API pour continuer.',
+  signIn: 'Se connecter',
+  signingIn: 'Connexion en cours…',
+  authContinue: 'Continuer',
 } satisfies Record<keyof typeof en, string>
 
 /** German dictionary, checked against the English keys. */
@@ -853,6 +862,9 @@ export const de = {
   onboardingSave: 'Speichern und fortfahren',
   onboardingSaving: 'Speichern…',
   keyRequired: 'Geben Sie einen API-Schlüssel ein, um fortzufahren.',
+  signIn: 'Anmelden',
+  signingIn: 'Anmeldung läuft…',
+  authContinue: 'Weiter',
 } satisfies Record<keyof typeof en, string>
 
 /** Russian dictionary, checked against the English keys. */
@@ -994,6 +1006,9 @@ export const ru = {
   onboardingSave: 'Сохранить и продолжить',
   onboardingSaving: 'Сохранение…',
   keyRequired: 'Введите ключ API, чтобы продолжить.',
+  signIn: 'Войти',
+  signingIn: 'Вход…',
+  authContinue: 'Продолжить',
 } satisfies Record<keyof typeof en, string>
 
 /** Portuguese dictionary, checked against the English keys. */
@@ -1135,4 +1150,7 @@ export const pt = {
   onboardingSave: 'Salvar e continuar',
   onboardingSaving: 'Salvando…',
   keyRequired: 'Insira uma chave de API para continuar.',
+  signIn: 'Entrar',
+  signingIn: 'Entrando…',
+  authContinue: 'Continuar',
 } satisfies Record<keyof typeof en, string>

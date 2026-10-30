@@ -14,6 +14,13 @@ function operations(discoverModels: ModelsOperations['discoverModels']): ModelsO
     storeCredential: vi.fn(),
     removeCredential: vi.fn(),
     writeSettings: vi.fn(),
+    listAuthorizations: async () => [],
+    beginAuthorization: async () => ({ kind: 'cancelled' }),
+    cancelAuthorization: async () => {},
+    onAuthorizationNotice: () => () => {},
+    onAuthorizationPrompt: () => () => {},
+    answerAuthorizationPrompt: async () => undefined,
+    declineAuthorizationPrompt: async () => {},
   }
 }
 

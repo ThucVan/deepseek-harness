@@ -244,6 +244,13 @@ describe('reasoning levels in the model list', () => {
     storeCredential: vi.fn(),
     removeCredential: vi.fn(),
     writeSettings: vi.fn(),
+    listAuthorizations: async () => [],
+    beginAuthorization: async () => ({ kind: 'cancelled' }),
+    cancelAuthorization: async () => {},
+    onAuthorizationNotice: () => () => {},
+    onAuthorizationPrompt: () => () => {},
+    answerAuthorizationPrompt: async () => undefined,
+    declineAuthorizationPrompt: async () => {},
   }
 
   /** Render the list over local state, reporting every write. */
